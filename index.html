@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rascal - A Scoundrel Variant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 1rem;
+            color: #fff;
+        }
+
+        .game-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .game-board {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .life-counter {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: rgba(255,255,255,0.15);
+            border-radius: 0.5rem;
+        }
+
+        .life-counter h2 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .life-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ff6b6b;
+            text-shadow: 0 0 10px rgba(255,107,107,0.5);
+        }
+
+        .room-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .room-section h3 {
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .room-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .card {
+            aspect-ratio: 2/3;
+            background: white;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.3);
+        }
+
+        .card.red {
+            color: #e74c3c;
+        }
+
+        .card.black {
+            color: #2c3e50;
+        }
+
+        .card.empty {
+            background: rgba(255,255,255,0.1);
+            cursor: default;
+            font-size: 1rem;
+            color: rgba(255,255,255,0.3);
+        }
+
+        .card.empty:hover {
+            transform: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        .card.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: grayscale(0.5);
+        }
+
+        .card.locked:hover {
+            transform: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        .card.locked::after {
+            content: '🔒';
+            position: absolute;
+            bottom: 0.25rem;
+            right: 0.25rem;
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .card-value {
+            position: absolute;
+            top: 0.25rem;
+            left: 0.25rem;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        @keyframes cardDeal {
+            from {
+                opacity: 0;
+                transform: translateX(-100px) rotate(-20deg);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) rotate(0);
+            }
+        }
+
+        .card.dealing {
+            animation: cardDeal 0.4s ease-out;
+        }
+
+        @keyframes cardDiscard {
+            to {
+                opacity: 0;
+                transform: translateX(100px) rotate(20deg);
+            }
+        }
+
+        .card.discarding {
+            animation: cardDiscard 0.3s ease-in forwards;
+        }
+
+        .equipment-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .equipment-slot {
+            background: rgba(255,255,255,0.1);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .equipment-slot h4 {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.8;
+        }
+
+        .equipment-card {
+            position: relative;
+            display: inline-block;
+        }
+
+        .shield-monsters {
+            position: absolute;
+            bottom: -0.5rem;
+            right: -0.5rem;
+            background: #e74c3c;
+            color: white;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        button {
+            flex: 1;
+            padding: 0.875rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.3);
+        }
+
+        button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+
+        .message {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255,255,255,0.15);
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            min-height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .message.warning {
+            background: rgba(255,193,7,0.3);
+            border: 2px solid rgba(255,193,7,0.6);
+        }
+
+        .message.error {
+            background: rgba(244,67,54,0.3);
+            border: 2px solid rgba(244,67,54,0.6);
+        }
+
+        .message.success {
+            background: rgba(76,175,80,0.3);
+            border: 2px solid rgba(76,175,80,0.6);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .stat-item {
+            background: rgba(255,255,255,0.1);
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            text-align: center;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .life-display.damaged {
+            animation: pulse 0.5s ease-in-out;
+            color: #ff4444;
+        }
+
+        .life-display.healed {
+            animation: pulse 0.5s ease-in-out;
+            color: #4caf50;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            max-width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .modal-content h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal-content p {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                font-size: 2.5rem;
+            }
+
+            .equipment-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .action-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .action-modal.active {
+            display: flex;
+        }
+
+        .action-modal-content {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            max-width: 90%;
+            width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .action-modal-content h3 {
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .action-modal-content .card {
+            margin: 0 auto 1rem;
+            width: 100px;
+        }
+
+        .action-modal-content .button-group {
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎴 Rascal</h1>
+
+        <div class="game-board">
+            <div class="life-counter">
+                <h2>Life Points</h2>
+                <div class="life-display" id="lifeDisplay">20 ❤️</div>
+            </div>
+
+            <div class="message" id="messageBox">Welcome to Rascal! Start a new game to begin.</div>
+
+            <div class="button-group">
+                <button class="btn-primary" id="newGameBtn">New Game</button>
+                <button class="btn-secondary" id="nextRoomBtn" disabled>Next Room</button>
+            </div>
+
+            <div class="room-section">
+                <h3>Current Room</h3>
+                <div class="room-cards" id="roomCards"></div>
+            </div>
+
+            <div class="equipment-section">
+                <div class="equipment-slot">
+                    <h4>Equipped Shield</h4>
+                    <div id="shieldSlot" class="equipment-card">
+                        <div class="card empty">No Shield</div>
+                    </div>
+                </div>
+                <div class="equipment-slot">
+                    <h4>Inventory</h4>
+                    <div id="inventorySlot" class="equipment-card">
+                        <div class="card empty">Empty</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-item">
+                    <strong>Cards Left:</strong> <span id="deckCount">0</span>
+                </div>
+                <div class="stat-item">
+                    <strong>Room Cards:</strong> <span id="roomCount">0</span>
+                </div>
+                <div class="stat-item">
+                    <strong>Can Flee:</strong> <span id="canFleeStatus">No</span>
+                </div>
+                <div class="stat-item">
+                    <strong>Potions Used:</strong> <span id="potionCount">0</span>/1
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="gameOverModal">
+        <div class="modal-content">
+            <h2 id="gameOverTitle">Game Over</h2>
+            <p id="gameOverMessage"></p>
+            <button class="btn-primary" onclick="startNewGame()">Play Again</button>
+        </div>
+    </div>
+
+    <div class="action-modal" id="actionModal">
+        <div class="action-modal-content">
+            <h3 id="actionModalTitle">Choose Action</h3>
+            <div id="actionModalCard"></div>
+            <div class="button-group" id="actionModalButtons"></div>
+        </div>
+    </div>
+
+    <script>
+        // Card suit symbols
+        const SUITS = {
+            SPADES: '♠️',
+            CLUBS: '♣️',
+            HEARTS: '♥️',
+            DIAMONDS: '♦️'
+        };
+
+        // Card values
+        const VALUES = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+
+        // Game state
+        let gameState = {
+            life: 20,
+            deck: [],
+            room: [],
+            shield: null,
+            shieldDamage: 0,
+            inventory: null,
+            discard: [],
+            canFlee: true,
+            roomTouched: false,
+            potionsUsedThisRoom: 0,
+            gameOver: false
+        };
+
+        // Create a card object
+        function createCard(value, suit) {
+            const numValue = value === 'A' ? 14 : (value === 'K' ? 13 : (value === 'Q' ? 12 : (value === 'J' ? 11 : parseInt(value))));
+            return {
+                value,
+                numValue,
+                suit,
+                symbol: suit,
+                color: (suit === SUITS.HEARTS || suit === SUITS.DIAMONDS) ? 'red' : 'black',
+                type: suit === SUITS.SPADES || suit === SUITS.CLUBS ? 'monster' :
+                      suit === SUITS.DIAMONDS ? 'shield' : 'potion'
+            };
+        }
+
+        // Initialize deck (excluding high red cards J,Q,K,A of hearts and diamonds)
+        function createDeck() {
+            const deck = [];
+
+            // Add all black cards (2-A)
+            VALUES.forEach(value => {
+                deck.push(createCard(value, SUITS.SPADES));
+                deck.push(createCard(value, SUITS.CLUBS));
+            });
+
+            // Add low red cards (2-10)
+            ['2', '3', '4', '5', '6', '7', '8', '9', '10'].forEach(value => {
+                deck.push(createCard(value, SUITS.HEARTS));
+                deck.push(createCard(value, SUITS.DIAMONDS));
+            });
+
+            return shuffle(deck);
+        }
+
+        // Shuffle array
+        function shuffle(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Start a new game
+        function startNewGame() {
+            gameState = {
+                life: 20,
+                deck: createDeck(),
+                room: [],
+                shield: null,
+                shieldDamage: 0,
+                inventory: null,
+                discard: [],
+                canFlee: true,
+                roomTouched: false,
+                potionsUsedThisRoom: 0,
+                gameOver: false
+            };
+
+            document.getElementById('gameOverModal').classList.remove('active');
+            dealRoom();
+            updateUI();
+            showMessage('New game started! Choose your actions wisely.');
+        }
+
+        // Deal a room (4 cards, or top up to 4)
+        function dealRoom() {
+            while (gameState.room.length < 4 && gameState.deck.length > 0) {
+                gameState.room.push(gameState.deck.shift());
+            }
+            gameState.potionsUsedThisRoom = 0;
+            gameState.roomTouched = false;
+            updateUI();
+        }
+
+        // Show a message
+        function showMessage(text, type = '') {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.textContent = text;
+            messageBox.className = 'message' + (type ? ' ' + type : '');
+        }
+
+        // Handle card click
+        function handleCardClick(index) {
+            if (gameState.gameOver) return;
+
+            const card = gameState.room[index];
+            if (!card) return;
+
+            showActionModal(card, index);
+        }
+
+        // Show action modal
+        function showActionModal(card, index) {
+            const modal = document.getElementById('actionModal');
+            const title = document.getElementById('actionModalTitle');
+            const cardDisplay = document.getElementById('actionModalCard');
+            const buttons = document.getElementById('actionModalButtons');
+
+            // Display card
+            cardDisplay.innerHTML = renderCard(card, -1);
+
+            // Build action buttons based on card type
+            buttons.innerHTML = '';
+
+            if (card.type === 'monster') {
+                title.textContent = `Monster (${card.numValue} damage)`;
+
+                // Fight barehanded
+                buttons.appendChild(createActionButton('Fight Barehanded', 'btn-danger', () => {
+                    fightMonster(index, false);
+                    modal.classList.remove('active');
+                }));
+
+                // Fight with shield
+                if (gameState.shield) {
+                    const shieldValue = Math.max(0, gameState.shield.numValue - gameState.shieldDamage);
+                    buttons.appendChild(createActionButton(`Fight with Shield (${shieldValue} defense)`, 'btn-primary', () => {
+                        fightMonster(index, true);
+                        modal.classList.remove('active');
+                    }));
+                }
+            } else if (card.type === 'shield') {
+                title.textContent = `Shield (${card.numValue} defense)`;
+
+                // Equip shield
+                buttons.appendChild(createActionButton('Equip Shield', 'btn-success', () => {
+                    equipShield(index);
+                    modal.classList.remove('active');
+                }));
+
+                // Store in inventory
+                if (!hasMonsters() && !gameState.inventory) {
+                    buttons.appendChild(createActionButton('Store in Inventory', 'btn-secondary', () => {
+                        storeInInventory(index);
+                        modal.classList.remove('active');
+                    }));
+                }
+
+                // Repair shield (if 2 of diamonds)
+                if (card.value === '2' && gameState.shield && gameState.shieldDamage > 0) {
+                    buttons.appendChild(createActionButton('Repair Shield', 'btn-primary', () => {
+                        repairShield(index);
+                        modal.classList.remove('active');
+                    }));
+                }
+
+                // Discard
+                buttons.appendChild(createActionButton('Discard', 'btn-danger', () => {
+                    discardCard(index);
+                    modal.classList.remove('active');
+                }));
+            } else if (card.type === 'potion') {
+                title.textContent = `Potion (restores ${card.numValue} life)`;
+
+                // Use potion
+                if (gameState.potionsUsedThisRoom === 0 && gameState.life < 20) {
+                    buttons.appendChild(createActionButton('Use Potion', 'btn-success', () => {
+                        usePotion(index);
+                        modal.classList.remove('active');
+                    }));
+                }
+
+                // Store in inventory
+                if (!hasMonsters() && !gameState.inventory) {
+                    buttons.appendChild(createActionButton('Store in Inventory', 'btn-secondary', () => {
+                        storeInInventory(index);
+                        modal.classList.remove('active');
+                    }));
+                }
+
+                // Discard
+                buttons.appendChild(createActionButton('Discard', 'btn-danger', () => {
+                    discardCard(index);
+                    modal.classList.remove('active');
+                }));
+            }
+
+            // Cancel button
+            buttons.appendChild(createActionButton('Cancel', 'btn-secondary', () => {
+                modal.classList.remove('active');
+            }));
+
+            modal.classList.add('active');
+        }
+
+        // Create action button helper
+        function createActionButton(text, className, onClick) {
+            const button = document.createElement('button');
+            button.textContent = text;
+            button.className = className;
+            button.onclick = onClick;
+            return button;
+        }
+
+        // Check if there are monsters in the room
+        function hasMonsters() {
+            return gameState.room.some(card => card && card.type === 'monster');
+        }
+
+        // Fight a monster
+        function fightMonster(index, withShield) {
+            gameState.roomTouched = true;
+            const monster = gameState.room[index];
+            let damage = monster.numValue;
+
+            if (withShield && gameState.shield) {
+                const shieldValue = Math.max(0, gameState.shield.numValue - gameState.shieldDamage);
+                damage = Math.max(0, damage - shieldValue);
+                gameState.shieldDamage++;
+
+                if (damage > 0) {
+                    showMessage(`Shield absorbed ${shieldValue} damage! You took ${damage} damage.`, 'warning');
+                } else {
+                    showMessage(`Shield absorbed all damage!`, 'success');
+                }
+            } else {
+                showMessage(`You fought barehanded and took ${damage} damage!`, 'error');
+            }
+
+            takeDamage(damage);
+            removeRoomCard(index);
+        }
+
+        // Equip a shield
+        function equipShield(index) {
+            gameState.roomTouched = true;
+            if (gameState.shield) {
+                gameState.discard.push(gameState.shield);
+                showMessage('Previous shield discarded.');
+            }
+
+            gameState.shield = gameState.room[index];
+            gameState.shieldDamage = 0;
+            showMessage(`Equipped ${gameState.shield.value}${gameState.shield.symbol} shield!`, 'success');
+            removeRoomCard(index);
+        }
+
+        // Use a potion
+        function usePotion(index) {
+            gameState.roomTouched = true;
+            const potion = gameState.room[index];
+            const healing = Math.min(potion.numValue, 20 - gameState.life);
+            gameState.life = Math.min(20, gameState.life + potion.numValue);
+            gameState.potionsUsedThisRoom++;
+
+            showMessage(`Restored ${healing} life points!`, 'success');
+
+            const lifeDisplay = document.getElementById('lifeDisplay');
+            lifeDisplay.classList.add('healed');
+            setTimeout(() => lifeDisplay.classList.remove('healed'), 500);
+
+            removeRoomCard(index);
+        }
+
+        // Store in inventory
+        function storeInInventory(index) {
+            gameState.roomTouched = true;
+            if (gameState.inventory) {
+                gameState.discard.push(gameState.inventory);
+                showMessage(`Previous item discarded.`);
+            }
+
+            gameState.inventory = gameState.room[index];
+            showMessage(`Stored ${gameState.inventory.value}${gameState.inventory.symbol} in inventory!`, 'success');
+            removeRoomCard(index);
+        }
+
+        // Repair shield with 2 of diamonds
+        function repairShield(index) {
+            gameState.roomTouched = true;
+            const repairAmount = Math.min(2, gameState.shieldDamage);
+            gameState.shieldDamage -= repairAmount;
+            showMessage(`Repaired ${repairAmount} points of shield damage!`, 'success');
+            removeRoomCard(index);
+        }
+
+        // Discard a card
+        function discardCard(index) {
+            gameState.roomTouched = true;
+            const card = gameState.room[index];
+            showMessage(`Discarded ${card.value}${card.symbol}.`);
+            removeRoomCard(index);
+        }
+
+        // Remove a card from the room
+        function removeRoomCard(index) {
+            const card = gameState.room[index];
+            gameState.discard.push(card);
+            gameState.room[index] = null;
+
+            // Compact the array
+            gameState.room = gameState.room.filter(c => c !== null);
+
+            updateUI();
+            checkRoomComplete();
+        }
+
+        // Take damage
+        function takeDamage(amount) {
+            if (amount <= 0) return;
+
+            gameState.life -= amount;
+
+            const lifeDisplay = document.getElementById('lifeDisplay');
+            lifeDisplay.classList.add('damaged');
+            setTimeout(() => lifeDisplay.classList.remove('damaged'), 500);
+
+            if (gameState.life <= 0) {
+                endGame(false);
+            }
+        }
+
+        // Check if room is complete
+        function checkRoomComplete() {
+            if (gameState.room.length === 1) {
+                document.getElementById('nextRoomBtn').disabled = false;
+                showMessage('One card remains. You can advance to the next room!', 'success');
+            } else if (gameState.room.length === 0) {
+                advanceToNextRoom();
+            }
+        }
+
+        // Flee the current room
+        function flee() {
+            if (!gameState.canFlee) {
+                showMessage('You cannot flee two rooms in a row!', 'error');
+                return;
+            }
+
+            if (gameState.roomTouched) {
+                showMessage('You cannot flee once you\'ve started fighting!', 'error');
+                return;
+            }
+
+            // Put all room cards back at bottom of deck
+            gameState.deck.push(...gameState.room);
+            gameState.room = [];
+            gameState.canFlee = false;
+
+            showMessage('You fled the room! Cards returned to bottom of dungeon.', 'warning');
+            dealRoom();
+        }
+
+        // Advance to next room
+        function advanceToNextRoom() {
+            gameState.canFlee = true;
+
+            if (gameState.deck.length === 0 && gameState.room.length === 0) {
+                endGame(true);
+                return;
+            }
+
+            dealRoom();
+            showMessage('Entering next room...', 'success');
+        }
+
+        // End the game
+        function endGame(won) {
+            gameState.gameOver = true;
+            const modal = document.getElementById('gameOverModal');
+            const title = document.getElementById('gameOverTitle');
+            const message = document.getElementById('gameOverMessage');
+
+            if (won) {
+                title.textContent = '🎉 Victory!';
+                message.textContent = 'You cleared the dungeon!';
+            } else {
+                title.textContent = '💀 Defeat';
+                message.textContent = `You were defeated with ${gameState.deck.length + gameState.room.length} cards remaining.`;
+            }
+
+            modal.classList.add('active');
+        }
+
+        // Handle inventory click
+        function handleInventoryClick() {
+            if (!gameState.inventory) return;
+            if (hasMonsters()) {
+                showMessage('Cannot access inventory while monsters are present!', 'error');
+                return;
+            }
+
+            const card = gameState.inventory;
+            const modal = document.getElementById('actionModal');
+            const title = document.getElementById('actionModalTitle');
+            const cardDisplay = document.getElementById('actionModalCard');
+            const buttons = document.getElementById('actionModalButtons');
+
+            title.textContent = 'Inventory Item';
+            cardDisplay.innerHTML = renderCard(card, -1);
+            buttons.innerHTML = '';
+
+            if (card.type === 'shield') {
+                buttons.appendChild(createActionButton('Equip Shield', 'btn-success', () => {
+                    if (gameState.shield) {
+                        gameState.discard.push(gameState.shield);
+                    }
+                    gameState.shield = card;
+                    gameState.shieldDamage = 0;
+                    gameState.inventory = null;
+                    showMessage(`Equipped shield from inventory!`, 'success');
+                    updateUI();
+                    modal.classList.remove('active');
+                }));
+            } else if (card.type === 'potion') {
+                if (gameState.potionsUsedThisRoom === 0 && gameState.life < 20) {
+                    buttons.appendChild(createActionButton('Use Potion', 'btn-success', () => {
+                        const healing = Math.min(card.numValue, 20 - gameState.life);
+                        gameState.life = Math.min(20, gameState.life + card.numValue);
+                        gameState.potionsUsedThisRoom++;
+                        gameState.inventory = null;
+                        showMessage(`Restored ${healing} life points!`, 'success');
+                        updateUI();
+                        modal.classList.remove('active');
+                    }));
+                }
+            }
+
+            buttons.appendChild(createActionButton('Discard', 'btn-danger', () => {
+                gameState.discard.push(card);
+                gameState.inventory = null;
+                showMessage('Discarded item from inventory.');
+                updateUI();
+                modal.classList.remove('active');
+            }));
+
+            buttons.appendChild(createActionButton('Cancel', 'btn-secondary', () => {
+                modal.classList.remove('active');
+            }));
+
+            modal.classList.add('active');
+        }
+
+        // Handle shield click
+        function handleShieldClick() {
+            if (!gameState.shield) return;
+
+            const modal = document.getElementById('actionModal');
+            const title = document.getElementById('actionModalTitle');
+            const cardDisplay = document.getElementById('actionModalCard');
+            const buttons = document.getElementById('actionModalButtons');
+
+            const shieldValue = Math.max(0, gameState.shield.numValue - gameState.shieldDamage);
+            title.textContent = `Equipped Shield (${shieldValue} defense)`;
+            cardDisplay.innerHTML = renderCard(gameState.shield, -1);
+            buttons.innerHTML = '';
+
+            buttons.appendChild(createActionButton('Discard Shield', 'btn-danger', () => {
+                gameState.discard.push(gameState.shield);
+                gameState.shield = null;
+                gameState.shieldDamage = 0;
+                showMessage('Shield discarded.');
+                updateUI();
+                modal.classList.remove('active');
+            }));
+
+            buttons.appendChild(createActionButton('Cancel', 'btn-secondary', () => {
+                modal.classList.remove('active');
+            }));
+
+            modal.classList.add('active');
+        }
+
+        // Render a card
+        function renderCard(card, index) {
+            if (!card) {
+                return '<div class="card empty">Empty</div>';
+            }
+
+            const onClick = index >= 0 ? `onclick="handleCardClick(${index})"` : '';
+            return `<div class="card ${card.color} dealing" ${onClick}>
+                <span class="card-value">${card.value}</span>
+                ${card.symbol}
+            </div>`;
+        }
+
+        // Update the UI
+        function updateUI() {
+            // Life counter
+            document.getElementById('lifeDisplay').textContent = `${gameState.life} ❤️`;
+
+            // Room cards
+            const roomCards = document.getElementById('roomCards');
+            roomCards.innerHTML = '';
+
+            for (let i = 0; i < 4; i++) {
+                if (i < gameState.room.length) {
+                    roomCards.innerHTML += renderCard(gameState.room[i], i);
+                } else {
+                    roomCards.innerHTML += '<div class="card empty">Empty</div>';
+                }
+            }
+
+            // Shield
+            const shieldSlot = document.getElementById('shieldSlot');
+            const monstersPresent = hasMonsters();
+            if (gameState.shield) {
+                const shieldValue = Math.max(0, gameState.shield.numValue - gameState.shieldDamage);
+                shieldSlot.innerHTML = `
+                    <div class="card ${gameState.shield.color}" onclick="handleShieldClick()">
+                        <span class="card-value">${gameState.shield.value}</span>
+                        ${gameState.shield.symbol}
+                        ${gameState.shieldDamage > 0 ? `<div class="shield-monsters">${gameState.shieldDamage}</div>` : ''}
+                    </div>
+                `;
+            } else {
+                shieldSlot.innerHTML = '<div class="card empty">No Shield</div>';
+            }
+
+            // Inventory
+            const inventorySlot = document.getElementById('inventorySlot');
+            if (gameState.inventory) {
+                const lockedClass = monstersPresent ? 'locked' : '';
+                inventorySlot.innerHTML = `
+                    <div class="card ${gameState.inventory.color} ${lockedClass}" onclick="handleInventoryClick()">
+                        <span class="card-value">${gameState.inventory.value}</span>
+                        ${gameState.inventory.symbol}
+                    </div>
+                `;
+            } else {
+                const lockedClass = monstersPresent ? 'locked' : '';
+                inventorySlot.innerHTML = `<div class="card empty ${lockedClass}">Empty</div>`;
+            }
+
+            // Stats
+            document.getElementById('deckCount').textContent = gameState.deck.length;
+            document.getElementById('roomCount').textContent = gameState.room.length;
+            document.getElementById('canFleeStatus').textContent = gameState.canFlee ? 'Yes' : 'No';
+            document.getElementById('potionCount').textContent = gameState.potionsUsedThisRoom;
+
+            // Next Room button (context-aware)
+            const nextRoomBtn = document.getElementById('nextRoomBtn');
+
+            // Check if this is a flee scenario
+            const canFleeNow = !gameState.roomTouched && gameState.canFlee && gameState.room.length === 4;
+            const canAdvance = gameState.room.length === 1;
+
+            if (canFleeNow) {
+                nextRoomBtn.textContent = 'Flee Room';
+                nextRoomBtn.className = 'btn-danger';
+                nextRoomBtn.disabled = false;
+            } else if (canAdvance) {
+                nextRoomBtn.textContent = 'Next Room';
+                nextRoomBtn.className = 'btn-secondary';
+                nextRoomBtn.disabled = false;
+            } else {
+                nextRoomBtn.textContent = 'Next Room';
+                nextRoomBtn.className = 'btn-secondary';
+                nextRoomBtn.disabled = true;
+            }
+        }
+
+        // Handle next room button (flee or advance)
+        function handleNextRoom() {
+            // If room is untouched and can flee, then flee
+            if (!gameState.roomTouched && gameState.canFlee && gameState.room.length === 4) {
+                flee();
+            } else {
+                advanceToNextRoom();
+            }
+        }
+
+        // Event listeners
+        document.getElementById('newGameBtn').addEventListener('click', startNewGame);
+        document.getElementById('nextRoomBtn').addEventListener('click', handleNextRoom);
+
+        // Initialize
+        updateUI();
+    </script>
+</body>
+</html>
