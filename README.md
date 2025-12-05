@@ -1,4 +1,5 @@
-# Rascal
+Rascal
+======
 _A [Scoundrel] Variant_
 
 Original by Zach Gage and Kurt Bieg  
@@ -12,7 +13,8 @@ This version and app by Benjamin Holt © 2025 MIT or CC-BY License
 [BGG]: https://boardgamegeek.com/boardgame/191095/scoundrel
 [roguelike]: https://en.wikipedia.org/wiki/Roguelike
 
-## Setup
+Setup
+-----
 Start with a standard 52-card deck (jokers are not used), separate high red cards (J,Q,K,A ♦️/♥️); these can be used as the "life counter" by assigning 1-4 to J-A (1+2+3+4 = 10 x 2 suits = 20 life), turning them face-down when points are lost and face-up when they are restored or to "make change" as needed.
 
 When damage is taken turn the appropriate value of life points face down; when life points are restored, turn that value back face-up.  Life points can never go above 20; if they ever go below one, the game is lost.
@@ -34,7 +36,8 @@ Dungeon 🂠   🂶🃝🃑🂸   🂠 Discard
               Life
 ```
 
-## Gameplay
+Gameplay
+--------
 Play is a series of four card "rooms".
 
 Upon "entering" a room, you may choose to fight or flee; if you flee, all four room cards are scooped up and added back to the bottom of the dungeon to come up again later.  You may not flee two rooms in a row.
@@ -50,7 +53,8 @@ When three of the room cards have been disposed of, you have the option to move 
 
 You win when the dungeon is cleared.
 
-## Special Rules
+Special Rules
+-------------
 
 ### Inventory
 You also have one inventory slot, however you cannot access it (either to store or retrieve an item) when any monsters are present; any item in inventory must be used or discarded when replacing with another item from the room.
@@ -58,7 +62,8 @@ You also have one inventory slot, however you cannot access it (either to store 
 ### Repair
 The 2♦️ can be used to repair up to two points of damage on your equipped shield; discard the 2♦️ and up to two monsters from your shield stack.
 
-## Balance
+Balance
+-------
 As-designed, Rascal is pretty winnable; no, not every dungeon can be beaten, and mis-steps are often costly, but if you're making good choices about conserving resources, etc. you win a lot of the time.  That's how I like it.  There are also many ways you can tune the game; a few ideas follow.
 
 ### Pull Cards
