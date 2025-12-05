@@ -452,6 +452,15 @@
         .action-modal-content .button-group {
             flex-direction: column;
         }
+
+        .version {
+            max-width: 600px;
+            margin: 0.5rem auto;
+            padding-left: 0.5rem;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.5);
+            font-family: monospace;
+        }
     </style>
 </head>
 <body>
@@ -509,6 +518,8 @@
         </div>
     </div>
 
+    <div class="version" id="version"></div>
+
     <div class="modal" id="gameOverModal">
         <div class="modal-content">
             <h2 id="gameOverTitle">Game Over</h2>
@@ -526,6 +537,9 @@
     </div>
 
     <script>
+        // Version
+        const VERSION = 'v1.5.0';
+
         // Card suit symbols
         const SUITS = {
             SPADES: '♠️',
@@ -1120,6 +1134,7 @@
         document.getElementById('nextRoomBtn').addEventListener('click', handleNextRoom);
 
         // Initialize
+        document.getElementById('version').textContent = VERSION;
         updateUI();
     </script>
 </body>
