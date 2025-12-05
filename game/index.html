@@ -71,8 +71,8 @@
 
         .room-cards {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-            gap: 0.75rem;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
             margin-bottom: 1rem;
         }
 
@@ -367,6 +367,10 @@
         @media (max-width: 480px) {
             .card {
                 font-size: 2.5rem;
+            }
+
+            .room-cards {
+                gap: 0.4rem;
             }
 
             .equipment-section {
