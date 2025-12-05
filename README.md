@@ -2,7 +2,7 @@ Rascal
 ======
 _A [Scoundrel] Variant_
 
-Original by Zach Gage and Kurt Bieg
+Original by Zach Gage and Kurt Bieg  
 This version and app by Benjamin Holt © 2025 MIT or CC-BY License
 
 **[Play Rascal](play)**
