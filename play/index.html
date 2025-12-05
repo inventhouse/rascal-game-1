@@ -532,7 +532,7 @@
 
     <script>
         // Version
-        const VERSION = 'v1.6.0';
+        const VERSION = 'v1.6.1';
 
         // Card suit symbols
         const SUITS = {
@@ -876,10 +876,13 @@
         // Check if room is complete
         function checkRoomComplete() {
             if (gameState.room.length === 1) {
-                document.getElementById('nextRoomBtn').disabled = false;
                 showMessage('One card remains. You can advance to the next room!', 'success');
             } else if (gameState.room.length === 0) {
-                advanceToNextRoom();
+                if (gameState.deck.length === 0) {
+                    endGame(true);
+                } else {
+                    showMessage('Room cleared! Click Next Room to continue.', 'success');
+                }
             }
         }
 
@@ -1118,7 +1121,7 @@
 
             // Check if this is a flee scenario
             const canFleeNow = !gameState.roomTouched && gameState.canFlee && gameState.room.length === 4;
-            const canAdvance = gameState.room.length === 1 && gameState.deck.length > 0;
+            const canAdvance = (gameState.room.length === 0 || gameState.room.length === 1) && gameState.deck.length > 0;
 
             if (canFleeNow) {
                 nextRoomBtn.textContent = 'Flee Room';
