@@ -22,6 +22,7 @@
         .game-container {
             max-width: 600px;
             margin: 0 auto;
+            position: relative;
         }
 
         h1 {
@@ -382,9 +383,9 @@
         }
 
         .info-button {
-            position: fixed;
-            top: 1rem;
-            left: 1rem;
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 2.5rem;
             height: 2.5rem;
             background: rgba(255,255,255,0.2);
@@ -454,9 +455,9 @@
     </style>
 </head>
 <body>
-    <a href="../" class="info-button" title="Rules & Info">i</a>
     <div class="game-container">
-        <h1>🎴 Rascal</h1>
+        <a href="../" class="info-button" title="Rules & Info">i</a>
+        <h1>🛡️ Rascal&nbsp;&nbsp;</h1>
 
         <div class="game-board">
             <div class="life-counter">
