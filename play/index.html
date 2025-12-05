@@ -490,13 +490,13 @@
                 <div class="equipment-slot">
                     <h4>Shield</h4>
                     <div id="shieldSlot" class="equipment-card">
-                        <div class="card empty">Empty</div>
+                        <div class="card empty"></div>
                     </div>
                 </div>
                 <div class="equipment-slot">
                     <h4>Inventory</h4>
                     <div id="inventorySlot" class="equipment-card">
-                        <div class="card empty">Empty</div>
+                        <div class="card empty"></div>
                     </div>
                 </div>
             </div>
@@ -532,7 +532,7 @@
 
     <script>
         // Version
-        const VERSION = 'v1.5.2';
+        const VERSION = 'v1.5.3';
 
         // Card suit symbols
         const SUITS = {
@@ -1027,7 +1027,7 @@
         // Render a card
         function renderCard(card, index) {
             if (!card) {
-                return '<div class="card empty">Empty</div>';
+                return '<div class="card empty"></div>';
             }
 
             const onClick = index >= 0 ? `onclick="handleCardClick(${index})"` : '';
@@ -1050,7 +1050,7 @@
                 if (i < gameState.room.length) {
                     roomCards.innerHTML += renderCard(gameState.room[i], i);
                 } else {
-                    roomCards.innerHTML += '<div class="card empty">Empty</div>';
+                    roomCards.innerHTML += '<div class="card empty"></div>';
                 }
             }
 
@@ -1067,7 +1067,7 @@
                     </div>
                 `;
             } else {
-                shieldSlot.innerHTML = '<div class="card empty">Empty</div>';
+                shieldSlot.innerHTML = '<div class="card empty"></div>';
             }
 
             // Inventory
@@ -1082,7 +1082,7 @@
                 `;
             } else {
                 const lockedClass = monstersPresent ? 'locked' : '';
-                inventorySlot.innerHTML = `<div class="card empty ${lockedClass}">Empty</div>`;
+                inventorySlot.innerHTML = `<div class="card empty ${lockedClass}"></div>`;
             }
 
             // Stats
