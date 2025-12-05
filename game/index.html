@@ -620,13 +620,7 @@
             if (card.type === 'monster') {
                 title.textContent = `Monster (${card.numValue} damage)`;
 
-                // Fight barehanded
-                buttons.appendChild(createActionButton('Fight Barehanded', 'btn-danger', () => {
-                    fightMonster(index, false);
-                    modal.classList.remove('active');
-                }));
-
-                // Fight with shield
+                // Fight with shield (show first if available)
                 if (gameState.shield) {
                     const shieldValue = Math.max(0, gameState.shield.numValue - gameState.shieldDamage);
                     buttons.appendChild(createActionButton(`Fight with Shield (${shieldValue} defense)`, 'btn-primary', () => {
@@ -634,6 +628,12 @@
                         modal.classList.remove('active');
                     }));
                 }
+
+                // Fight barehanded
+                buttons.appendChild(createActionButton('Fight Barehanded', 'btn-danger', () => {
+                    fightMonster(index, false);
+                    modal.classList.remove('active');
+                }));
             } else if (card.type === 'shield') {
                 title.textContent = `Shield (${card.numValue} defense)`;
 
