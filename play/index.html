@@ -490,7 +490,7 @@
                 <div class="equipment-slot">
                     <h4>Shield</h4>
                     <div id="shieldSlot" class="equipment-card">
-                        <div class="card empty">No Shield</div>
+                        <div class="card empty">Empty</div>
                     </div>
                 </div>
                 <div class="equipment-slot">
@@ -532,7 +532,7 @@
 
     <script>
         // Version
-        const VERSION = 'v1.5.1';
+        const VERSION = 'v1.5.2';
 
         // Card suit symbols
         const SUITS = {
@@ -1067,7 +1067,7 @@
                     </div>
                 `;
             } else {
-                shieldSlot.innerHTML = '<div class="card empty">No Shield</div>';
+                shieldSlot.innerHTML = '<div class="card empty">Empty</div>';
             }
 
             // Inventory
