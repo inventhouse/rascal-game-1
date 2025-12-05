@@ -506,12 +506,6 @@
                     <strong>Cards Left:</strong> <span id="deckCount">0</span>
                 </div>
                 <div class="stat-item">
-                    <strong>Room Cards:</strong> <span id="roomCount">0</span>
-                </div>
-                <div class="stat-item">
-                    <strong>Can Flee:</strong> <span id="canFleeStatus">No</span>
-                </div>
-                <div class="stat-item">
                     <strong>Potions Used:</strong> <span id="potionCount">0</span>/1
                 </div>
             </div>
@@ -538,7 +532,7 @@
 
     <script>
         // Version
-        const VERSION = 'v1.5.0';
+        const VERSION = 'v1.5.1';
 
         // Card suit symbols
         const SUITS = {
@@ -1093,8 +1087,6 @@
 
             // Stats
             document.getElementById('deckCount').textContent = gameState.deck.length;
-            document.getElementById('roomCount').textContent = gameState.room.length;
-            document.getElementById('canFleeStatus').textContent = gameState.canFlee ? 'Yes' : 'No';
             document.getElementById('potionCount').textContent = gameState.potionsUsedThisRoom;
 
             // Next Room button (context-aware)
